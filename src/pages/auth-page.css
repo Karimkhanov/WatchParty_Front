@@ -1,0 +1,118 @@
+.auth-container {
+  min-height: 100vh;
+  background-color: #1a1a1a;
+}
+
+.main-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 100px);
+  padding: 2rem;
+}
+
+.form-card {
+  background-color: #282828;
+  border-radius: 1rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  border: 2px solid #444;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tab {
+  padding: 1rem;
+  background-color: #1a1a1a;
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tab.active {
+  background-color: #444;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  color: #cccccc;
+  font-size: 1rem;
+}
+
+.form-input {
+  padding: 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #5cb753;
+}
+
+.helper-text {
+  color: #999;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: -0.5rem 0 0.5rem 0;
+}
+
+.submit-btn {
+  padding: 1rem;
+  background-color: #5cb753;
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-btn:hover {
+  background-color: #4a9642;
+}
+
+.forgot-password {
+  text-align: center;
+  color: #999;
+  text-decoration: underline;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.forgot-password:hover {
+  color: #cccccc;
+}
+
+.error-message {
+  padding: 1rem;
+  background-color: #8b4545;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  text-align: center;
+}

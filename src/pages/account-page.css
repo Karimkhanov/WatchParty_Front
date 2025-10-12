@@ -1,0 +1,439 @@
+.account-layout {
+  display: flex;
+  min-height: calc(100vh - 80px);
+}
+
+.account-sidebar {
+  width: 250px;
+  background-color: #1a1a1a;
+  border-right: 1px solid #282828;
+  padding: 2rem 0;
+}
+
+.sidebar-item {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  color: #cccccc;
+  text-align: left;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-item:hover {
+  background-color: #282828;
+  color: #ffffff;
+}
+
+.sidebar-item.active {
+  background-color: #282828;
+  border-left-color: #5cb753;
+  color: #ffffff;
+}
+
+.account-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.section-content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+  max-width: 1400px;
+}
+
+.section-content-full {
+  max-width: 1400px;
+}
+
+.form-section {
+  background-color: #282828;
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.section-subtitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 1.5rem 0;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  color: #cccccc;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #5cb753;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 1rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #5cb753;
+}
+
+.form-hint {
+  color: #999;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.username-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.username-prefix {
+  color: #cccccc;
+  font-size: 1.25rem;
+}
+
+.profile-picture-section {
+  background-color: #282828;
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.profile-picture-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+}
+
+.profile-picture {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.edit-picture-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #1a1a1a;
+  border: none;
+  border-radius: 1.5rem;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.input-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.verified-badge {
+  padding: 0.5rem 1rem;
+  background-color: #5cb753;
+  color: #ffffff;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.input-with-button {
+  display: flex;
+  gap: 1rem;
+}
+
+.verify-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #444;
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: #cccccc;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-top: 0.25rem;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.friends-section {
+  margin-top: 2rem;
+}
+
+.add-friend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.add-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #444;
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.friends-list {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: #1a1a1a;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: #282828;
+  border-radius: 0.5rem;
+}
+
+.friend-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #444;
+}
+
+.friend-name {
+  flex: 1;
+  color: #ffffff;
+}
+
+.delete-btn {
+  padding: 0.5rem 1rem;
+  background-color: #8b4545;
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.promo-card {
+  background-color: #282828;
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.promo-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #5cb753;
+  margin: 0 0 0.5rem 0;
+}
+
+.promo-text {
+  color: #cccccc;
+  margin-bottom: 1.5rem;
+}
+
+.promo-image {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+}
+
+.security-group {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #444;
+}
+
+.action-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #444;
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.auth-method {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #444;
+}
+
+.auth-method-title {
+  color: #ffffff;
+  margin: 0 0 0.25rem 0;
+}
+
+.configured-badge {
+  padding: 0.25rem 0.75rem;
+  background-color: #5cb753;
+  color: #ffffff;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+}
+
+.security-card {
+  background-color: #282828;
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.security-card-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #5cb753;
+  margin: 0 0 1rem 0;
+}
+
+.security-card-text {
+  color: #cccccc;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.security-image {
+  width: 200px;
+  height: auto;
+}
+
+.billing-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.billing-form {
+  background-color: #282828;
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 1rem;
+  background-color: #5cb753;
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.save-btn:hover {
+  background-color: #4a9642;
+}
+
+.payment-method-card {
+  background-color: #282828;
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.cards-image {
+  width: 100%;
+  max-width: 200px;
+  margin: 2rem 0;
+}
+
+.security-note {
+  color: #999;
+  font-size: 0.875rem;
+}
+
+.subscription-section {
+  background-color: #282828;
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.subscription-placeholder {
+  padding: 3rem;
+  text-align: center;
+  color: #999;
+  background-color: #1a1a1a;
+  border-radius: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .account-layout {
+    flex-direction: column;
+  }
+
+  .account-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #282828;
+  }
+
+  .section-content,
+  .billing-layout {
+    grid-template-columns: 1fr;
+  }
+}

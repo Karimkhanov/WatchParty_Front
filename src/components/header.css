@@ -1,0 +1,143 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #282828;
+}
+
+.logo {
+  font-family: "Brush Script MT", cursive;
+  font-size: 2rem;
+  color: #ffffff;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.nav {
+  display: flex;
+  gap: 2rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid transparent;
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.nav-link.active {
+  border-bottom-color: #5cb753;
+}
+
+.nav-link:hover {
+  border-bottom-color: #5cb753;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sign-in-btn,
+.sign-out-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.5rem;
+  background-color: transparent;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.sign-in-btn:hover,
+.sign-out-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sign-out-btn {
+  background-color: #8b4545;
+  border-color: #8b4545;
+}
+
+.sign-out-btn:hover {
+  background-color: #a04545;
+}
+
+.create-room-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background-color: #5cb753;
+  border: none;
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-room-btn:hover {
+  background-color: #4a9642;
+}
+
+/* Added account button styles */
+.account-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background-color: transparent;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.account-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #5cb753;
+  color: #5cb753;
+}
+
+.theme-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.theme-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.theme-btn.active {
+  color: #5cb753;
+}
+
+.theme-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
