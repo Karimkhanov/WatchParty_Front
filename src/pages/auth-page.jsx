@@ -1,208 +1,301 @@
 "use client"
 
+// src/pages/auth-page.jsx
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/auth-context"
-import { useToast } from "../components/toast"
 import "./auth-page.css"
 
-export default function AuthPage({ navigate }) {
-  const [activeTab, setActiveTab] = useState("login")
+export default function AuthPage() {
+  const [activeTab, setActiveTab] = useState("register")
+  const [registrationStep, setRegistrationStep] = useState(1) // 1 = email/password, 2 = username
   const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [formData, setFormData] = useState({ email: "", password: "", username: "", name: "", passwordAgain: "" })
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
+
+  const navigate = useNavigate()
   const { login, register } = useAuth()
-  const { showToast } = useToast()
 
-  const handleSubmit = (e) => {
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleContinueRegistration = (e) => {
     e.preventDefault()
+    setError("")
 
-    const formData = new FormData(e.target)
-
-    if (showForgotPassword) {
-      // Handle forgot password
-      console.log("[v0] Forgot password for:", formData.get("username"))
+    if (formData.password !== formData.passwordAgain) {
+      setError("Passwords do not match")
       return
     }
 
-    if (activeTab === "login") {
-      const email = formData.get("email")
-      const password = formData.get("password")
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters")
+      return
+    }
 
-      console.log("[v0] Attempting login with:", email)
-      const result = login(email, password)
-      console.log("[v0] Login result:", result)
+    setRegistrationStep(2)
+  }
 
-      if (result.success) {
-        showToast("Successfully logged in!", "success")
-        console.log("[v0] Navigating to rooms page")
-        navigate("rooms")
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    try {
+      if (activeTab === "login") {
+        const result = await login(formData.email, formData.password)
+        if (result.success) {
+          navigate("/")
+        } else {
+          setError(result.message || "Login failed")
+        }
       } else {
-        showToast("Invalid email or password", "error")
+        if (!formData.username.trim()) {
+          throw new Error("Username is required")
+        }
+        const result = await register({
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+          name: formData.name || formData.username,
+        })
+        if (result.success) {
+          navigate("/rooms")
+        } else {
+          setError(result.message || "Registration failed")
+        }
       }
-    } else {
-      const email = formData.get("email")
-      const password = formData.get("password")
-      const passwordAgain = formData.get("password-again")
-
-      if (password !== passwordAgain) {
-        showToast("Passwords do not match", "error")
-        return
-      }
-
-      const result = register(email, password)
-      if (result.success) {
-        showToast("Account created successfully!", "success")
-        navigate("rooms")
-      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || "An error occurred")
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleForgotPassword = (e) => {
+  const handleForgotPassword = async (e) => {
     e.preventDefault()
-    setShowForgotPassword(true)
-    setActiveTab("register")
+    setError("")
+    setLoading(true)
+
+    try {
+      // TODO: Implement actual forgot password API call
+      // await apiClient.post("/auth/forgot-password", { email: formData.email })
+      setSuccessMessage("Password reset link has been sent to your email!")
+      setTimeout(() => {
+        setShowForgotPassword(false)
+        setSuccessMessage("")
+        setActiveTab("login")
+      }, 3000)
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || "Failed to send reset email")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    setRegistrationStep(1)
+    setShowForgotPassword(false)
+    setError("")
+    setSuccessMessage("")
+  }
+
+  const handleBackToStep1 = () => {
+    setRegistrationStep(1)
+    setError("")
   }
 
   return (
     <div className="auth-container">
-      {/* Header */}
-      <header className="header">
-        <div className="logo">WatchParty</div>
-        <nav className="nav">
-          <a href="/" className="nav-link">
-            Home
-          </a>
-          <a href="/rooms" className="nav-link">
-            Rooms
-          </a>
-          <a href="/about" className="nav-link">
-            About Us
-          </a>
-        </nav>
-        <div className="header-actions">
-          <a href="/auth" className="sign-in-btn active">
-            Sign In
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M6 12L10 8L6 4"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </a>
-          <div className="theme-toggle">
-            <button className="theme-btn">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <circle cx="10" cy="10" r="4" />
-                <path d="M10 1V3M10 17V19M19 10H17M3 10H1M16.364 16.364L14.95 14.95M5.05 5.05L3.636 3.636M16.364 3.636L14.95 5.05M5.05 14.95L3.636 16.364" />
-              </svg>
-            </button>
-            <button className="theme-btn active">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="main-content">
-        <div className="form-card">
-          {/* Tabs */}
+      <div className="form-card">
+        {!showForgotPassword && (
           <div className="tabs">
             <button
               className={`tab ${activeTab === "register" ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab("register")
-                setShowForgotPassword(false)
-              }}
+              onClick={() => handleTabChange("register")}
             >
               Register
             </button>
-            <button
-              className={`tab ${activeTab === "login" ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab("login")
-                setShowForgotPassword(false)
-              }}
-            >
+            <button className={`tab ${activeTab === "login" ? "active" : ""}`} onClick={() => handleTabChange("login")}>
               Login
             </button>
           </div>
+        )}
 
-          {/* Form */}
-          <form className="form" onSubmit={handleSubmit}>
-            {showForgotPassword ? (
+        {showForgotPassword ? (
+          <form className="form" onSubmit={handleForgotPassword}>
+            <div className="form-header">
+              <h2 className="form-title">Reset Password</h2>
+              <p className="form-subtitle">Enter your email to receive a password reset link</p>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                name="email"
+                className="form-input"
+                required
+                value={formData.email}
+                onChange={handleInputChange}
+                autoComplete="email"
+              />
+            </div>
+
+            {error && <p className="error-message">{error}</p>}
+            {successMessage && <p className="success-message">{successMessage}</p>}
+
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? "Sending..." : "Send Reset Link"}
+            </button>
+
+            <button
+              type="button"
+              className="back-link"
+              onClick={() => {
+                setShowForgotPassword(false)
+                setError("")
+                setSuccessMessage("")
+              }}
+            >
+              Back to Login
+            </button>
+          </form>
+        ) : (
+          <form
+            className="form"
+            onSubmit={activeTab === "register" && registrationStep === 1 ? handleContinueRegistration : handleSubmit}
+          >
+            {activeTab === "register" && registrationStep === 1 && (
               <>
                 <div className="form-group">
-                  <label htmlFor="forgot-username" className="form-label">
-                    Username
-                  </label>
-                  <input type="text" id="forgot-username" name="username" className="form-input" required />
+                  <label className="form-label">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    className="form-input"
+                    required
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    autoComplete="email"
+                  />
                 </div>
 
-                <p className="helper-text">Create a unique name for your account so that other users can find you</p>
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    className="form-input"
+                    required
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    autoComplete="new-password"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Password Again</label>
+                  <input
+                    type="password"
+                    name="passwordAgain"
+                    className="form-input"
+                    required
+                    value={formData.passwordAgain}
+                    onChange={handleInputChange}
+                    autoComplete="new-password"
+                  />
+                </div>
+
+                {error && <p className="error-message">{error}</p>}
 
                 <button type="submit" className="submit-btn">
-                  Create Account
+                  Continue
                 </button>
               </>
-            ) : activeTab === "register" ? (
+            )}
+
+            {activeTab === "register" && registrationStep === 2 && (
               <>
                 <div className="form-group">
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
-                  <input type="email" id="email" name="email" className="form-input" required />
+                  <label className="form-label">Username</label>
+                  <input
+                    type="text"
+                    name="username"
+                    className="form-input"
+                    required
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    autoComplete="username"
+                  />
+                  <p className="helper-text">Create a unique name for your account so that other users can find you</p>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="password" className="form-label">
-                    Password
-                  </label>
-                  <input type="password" id="password" name="password" className="form-input" required />
-                </div>
+                {error && <p className="error-message">{error}</p>}
 
-                <div className="form-group">
-                  <label htmlFor="password-again" className="form-label">
-                    Password Again
-                  </label>
-                  <input type="password" id="password-again" name="password-again" className="form-input" required />
-                </div>
+                <button type="submit" className="submit-btn" disabled={loading}>
+                  {loading ? "Creating Account..." : "Create Account"}
+                </button>
 
-                <button type="submit" className="submit-btn">
-                  Submit
+                <button type="button" className="back-link" onClick={handleBackToStep1}>
+                  Back
                 </button>
               </>
-            ) : (
+            )}
+
+            {activeTab === "login" && (
               <>
                 <div className="form-group">
-                  <label htmlFor="login-email" className="form-label">
-                    Username or Email
-                  </label>
-                  <input type="text" id="login-email" name="email" className="form-input" required />
+                  <label className="form-label">Username or Email</label>
+                  <input
+                    type="text"
+                    name="email"
+                    className="form-input"
+                    required
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    autoComplete="email"
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="login-password" className="form-label">
-                    Password
-                  </label>
-                  <input type="password" id="login-password" name="password" className="form-input" required />
+                  <label className="form-label">Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    className="form-input"
+                    required
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    autoComplete="current-password"
+                  />
                 </div>
 
-                <button type="submit" className="submit-btn">
-                  Submit
+                {error && <p className="error-message">{error}</p>}
+
+                <button type="submit" className="submit-btn" disabled={loading}>
+                  {loading ? "Submitting..." : "Submit"}
                 </button>
 
-                <a href="#" className="forgot-password" onClick={handleForgotPassword}>
-                  FORGET YOUR PASSWORD?
-                </a>
+                <button
+                  type="button"
+                  className="forgot-password"
+                  onClick={() => {
+                    setShowForgotPassword(true)
+                    setError("")
+                  }}
+                >
+                  Forget your password?
+                </button>
               </>
             )}
           </form>
-        </div>
-      </main>
+        )}
+      </div>
     </div>
   )
 }

@@ -1,12 +1,15 @@
-"use client"
+// src/pages/about-page.jsx
 
-import Header from "../components/header"
-import "./about-page.css"
+// import Header from "../components/header"; // <-- ЛИШНИЙ импорт удален
+import { Link } from "react-router-dom";     // <-- ИСПОЛЬЗУЕМ Link для навигации
+import "./about-page.css";
 
-export default function AboutPage({ navigate }) {
+// export default function AboutPage({ navigate }) { // <-- Пропс navigate НЕ НУЖЕН
+export default function AboutPage() {
   return (
+    // Возвращаем вашу оригинальную обертку, она важна для стилей
     <div className="page-container">
-      <Header currentPage="about" navigate={navigate} />
+      {/* <Header /> <-- Этот вызов по-прежнему ЛИШНИЙ и удален */}
 
       <main className="about-main">
         <section className="about-hero">
@@ -83,15 +86,15 @@ export default function AboutPage({ navigate }) {
         <section className="about-cta">
           <h2 className="cta-title">Ready to start watching together?</h2>
           <div className="cta-buttons">
-            <a href="/rooms" className="cta-btn primary">
+            <Link to="/rooms" className="cta-btn primary">
               Explore Rooms
-            </a>
-            <a href="/auth" className="cta-btn secondary">
+            </Link>
+            <Link to="/auth" className="cta-btn secondary">
               Create Account
-            </a>
+            </Link>
           </div>
         </section>
       </main>
     </div>
-  )
+  );
 }

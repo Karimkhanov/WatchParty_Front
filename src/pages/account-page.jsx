@@ -1,25 +1,35 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/auth-context"
-import Header from "../components/header"
+import { showToast } from "../components/toast"
 import "./account-page.css"
 
-export default function AccountPage({ navigate }) {
-  const { user } = useAuth()
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+
+export default function AccountPage() {
+  const { user, loading, isAuthenticated, updateUser } = useAuth()
+  const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState("public-profile")
 
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate("/auth")
+    }
+  }, [navigate, isAuthenticated, loading])
+
+  if (loading) {
+    return <div className="loading-container">Loading...</div>
+  }
+
   if (!user) {
-    navigate("auth")
-    return null
+    return <div className="loading-container">Loading user data...</div>
   }
 
   return (
     <div className="page-container">
-      <Header currentPage="account" navigate={navigate} />
-
       <div className="account-layout">
-        {/* Sidebar */}
         <aside className="account-sidebar">
           <button
             className={`sidebar-item ${activeSection === "public-profile" ? "active" : ""}`}
@@ -47,10 +57,9 @@ export default function AccountPage({ navigate }) {
           </button>
         </aside>
 
-        {/* Main Content */}
         <main className="account-content">
-          {activeSection === "public-profile" && <PublicProfileSection user={user} />}
-          {activeSection === "personal-info" && <PersonalInfoSection user={user} />}
+          {activeSection === "public-profile" && <PublicProfileSection user={user} updateUser={updateUser} />}
+          {activeSection === "personal-info" && <PersonalInfoSection user={user} updateUser={updateUser} />}
           {activeSection === "security" && <SecuritySection />}
           {activeSection === "billing" && <BillingSection />}
         </main>
@@ -59,43 +68,192 @@ export default function AccountPage({ navigate }) {
   )
 }
 
-function PublicProfileSection({ user }) {
+function PublicProfileSection({ user, updateUser }) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [formData, setFormData] = useState({
+    name: user.name || "",
+    username: user.username || "",
+    bio: user.bio || "",
+  })
+  const [profilePicture, setProfilePicture] = useState(user.profile_picture || null)
+  const fileInputRef = useRef(null)
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      showToast("Please select an image file", "error")
+      return
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("File size must be less than 5MB", "error")
+      return
+    }
+
+    try {
+      const formData = new FormData()
+      formData.append("profilePicture", file)
+
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${API_URL}/api/auth/upload-profile-picture`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setProfilePicture(data.data.profile_picture)
+        updateUser({ ...user, profile_picture: data.data.profile_picture })
+        showToast("Profile picture updated successfully!", "success")
+      } else {
+        showToast(data.message || "Failed to upload profile picture", "error")
+      }
+    } catch (error) {
+      console.error("Upload error:", error)
+      showToast("Error uploading profile picture", "error")
+    }
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${API_URL}/api/auth/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        updateUser(data.data.user)
+        setIsEditing(false)
+        showToast("Profile updated successfully!", "success")
+      } else {
+        showToast(data.message || "Failed to update profile", "error")
+      }
+    } catch (error) {
+      console.error("Update error:", error)
+      showToast("Error updating profile", "error")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setFormData({
+      name: user.name || "",
+      username: user.username || "",
+      bio: user.bio || "",
+    })
+    setIsEditing(false)
+  }
+
   return (
     <div className="section-content">
-      <div className="form-section">
+      <div className="profile-form-section">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+          <h2 className="section-subtitle">Public Profile</h2>
+          {!isEditing ? (
+            <button className="edit-btn" onClick={() => setIsEditing(true)}>
+              Edit Profile
+            </button>
+          ) : (
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button className="cancel-btn" onClick={handleCancel} disabled={isSaving}>
+                Cancel
+              </button>
+              <button className="save-btn" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="form-group">
           <label className="form-label">Name</label>
-          <input type="text" className="form-input" defaultValue={user.name || "Arlan"} />
+          <input
+            type="text"
+            name="name"
+            className="form-input"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder="Arlan"
+            disabled={!isEditing}
+          />
           <p className="form-hint">The name that will be displayed to other users</p>
         </div>
 
         <div className="form-group">
           <label className="form-label">Username</label>
-          <div className="username-input">
+          <div className="username-input-wrapper">
             <span className="username-prefix">@</span>
-            <input type="text" className="form-input" defaultValue={user.username || "NeArlan"} />
+            <input
+              type="text"
+              name="username"
+              className="form-input-with-prefix"
+              value={formData.username}
+              onChange={handleInputChange}
+              placeholder="NeArlan"
+              disabled={!isEditing}
+            />
           </div>
           <p className="form-hint">A unique name that other users can use to find you</p>
         </div>
 
         <div className="form-group">
           <label className="form-label">Bio</label>
-          <textarea className="form-textarea" placeholder="Tell us a little about yourself" rows={6}></textarea>
+          <textarea
+            name="bio"
+            className="form-textarea"
+            placeholder="Tell us a little about yourself"
+            rows={6}
+            value={formData.bio}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+          ></textarea>
           <p className="form-hint">Description of your profile</p>
         </div>
       </div>
 
       <div className="profile-picture-section">
         <h3 className="section-subtitle">Profile Picture</h3>
-        <div className="profile-picture-container">
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Account%20Page,%20Public%20Profile-Wjko7.png"
-            alt="Profile"
-            className="profile-picture"
+        <div className="profile-picture-wrapper">
+          <div className="profile-picture-container">
+            <img
+              src={profilePicture ? `${API_URL}${profilePicture}` : "https://via.placeholder.com/200?text=No+Image"}
+              alt="Profile"
+              className="profile-picture"
+            />
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleFileSelect}
           />
-          <button className="edit-picture-btn">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="white">
-              <path d="M11.5 1.5L14.5 4.5L5 14H2V11L11.5 1.5Z" />
+          <button className="edit-picture-btn" onClick={() => fileInputRef.current?.click()}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M11.5 1.5L14.5 4.5L5 14H2V11L11.5 1.5Z" stroke="currentColor" strokeWidth="1.5" fill="none" />
             </svg>
             Edit
           </button>
@@ -105,104 +263,275 @@ function PublicProfileSection({ user }) {
   )
 }
 
-function PersonalInfoSection({ user }) {
+function PersonalInfoSection({ user, updateUser }) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [formData, setFormData] = useState({
+    email: user.email || "",
+    phone_number: user.phone_number || "",
+  })
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${API_URL}/api/auth/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        updateUser(data.data.user)
+        setIsEditing(false)
+        showToast("Personal information updated successfully!", "success")
+      } else {
+        showToast(data.message || "Failed to update information", "error")
+      }
+    } catch (error) {
+      console.error("Update error:", error)
+      showToast("Error updating information", "error")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setFormData({
+      email: user.email || "",
+      phone_number: user.phone_number || "",
+    })
+    setIsEditing(false)
+  }
+
   return (
     <div className="section-content">
-      <div className="form-section">
+      <div className="personal-info-form">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+          <h2 className="section-subtitle">Personal Information</h2>
+          {!isEditing ? (
+            <button className="edit-btn" onClick={() => setIsEditing(true)}>
+              Edit Information
+            </button>
+          ) : (
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button className="cancel-btn" onClick={handleCancel} disabled={isSaving}>
+                Cancel
+              </button>
+              <button className="save-btn" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="form-group">
           <label className="form-label">Email</label>
           <div className="input-with-badge">
-            <input type="email" className="form-input" defaultValue={user.email} readOnly />
+            <input
+              type="email"
+              name="email"
+              className="form-input"
+              value={formData.email}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+            />
             <span className="verified-badge">Verified</span>
           </div>
         </div>
 
         <div className="form-group">
           <label className="form-label">Phone Number</label>
-          <div className="input-with-button">
-            <input type="tel" className="form-input" placeholder="+77771234567" />
-            <button className="verify-btn">Verify</button>
-          </div>
+          <input
+            type="tel"
+            name="phone_number"
+            className="form-input"
+            placeholder="+77771234567"
+            value={formData.phone_number}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+          />
         </div>
 
         <div className="form-group">
           <label className="checkbox-label">
-            <input type="checkbox" />
+            <input type="checkbox" className="checkbox-input" />
             <span>I do not want to receive information about promotions and upcoming events</span>
           </label>
-        </div>
-
-        <div className="friends-section">
-          <h3 className="section-subtitle">Friends List</h3>
-          <div className="add-friend">
-            <span className="username-prefix">@</span>
-            <input type="text" className="form-input" placeholder="Add Friend by Username" />
-            <button className="add-btn">Add</button>
-          </div>
-
-          <div className="friends-list">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="friend-item">
-                <div className="friend-avatar"></div>
-                <div className="friend-name">Friend {i}</div>
-                <button className="delete-btn">Delete</button>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
       <div className="promo-card">
-        <h3 className="promo-title">More Friends, More Fun</h3>
-        <p className="promo-text">There are no limit to adding friends</p>
-        <img src="/friends-illustration.jpg" alt="Friends illustration" className="promo-image" />
+        <h3 className="promo-title">Stay Connected</h3>
+        <p className="promo-text">Keep your contact information up to date</p>
+        <div style={{ fontSize: "4rem", marginTop: "1rem" }}>📱</div>
       </div>
     </div>
   )
 }
 
 function SecuritySection() {
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target
+    setPasswordData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSavePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      showToast("New passwords do not match", "error")
+      return
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      showToast("Password must be at least 6 characters", "error")
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${API_URL}/api/auth/change-password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
+        setIsChangingPassword(false)
+        showToast("Password changed successfully!", "success")
+      } else {
+        showToast(data.message || "Failed to change password", "error")
+      }
+    } catch (error) {
+      console.error("Password change error:", error)
+      showToast("Error changing password", "error")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="section-content">
-      <div className="form-section">
+      <div className="security-form">
         <div className="security-group">
           <h3 className="section-subtitle">Password</h3>
-          <button className="action-btn">Change Password</button>
-          <p className="form-hint">Strengthen your account by ensuring your password is strong.</p>
+          {!isChangingPassword ? (
+            <>
+              <button className="change-password-btn" onClick={() => setIsChangingPassword(true)}>
+                Change Password
+              </button>
+              <p className="form-hint">Strengthen your account by ensuring your password is strong.</p>
+            </>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="form-group">
+                <label className="form-label">Current Password</label>
+                <input
+                  type="password"
+                  name="currentPassword"
+                  className="form-input"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">New Password</label>
+                <input
+                  type="password"
+                  name="newPassword"
+                  className="form-input"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Confirm New Password</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  className="form-input"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChange}
+                />
+              </div>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <button
+                  className="cancel-btn"
+                  onClick={() => {
+                    setIsChangingPassword(false)
+                    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
+                  }}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </button>
+                <button className="save-btn" onClick={handleSavePassword} disabled={isSaving}>
+                  {isSaving ? "Saving..." : "Save Password"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="security-group">
           <h3 className="section-subtitle">Two-factor authentication</h3>
 
           <div className="auth-method">
-            <div>
+            <div className="auth-method-info">
               <p className="auth-method-title">SMS/Text message</p>
               <p className="form-hint">You will receive one-time codes at your phone number</p>
             </div>
-            <button className="action-btn">Add</button>
+            <button className="action-btn-secondary">Add</button>
           </div>
 
           <div className="auth-method">
-            <div>
+            <div className="auth-method-info">
               <p className="auth-method-title">
                 Email message <span className="configured-badge">Configured</span>
               </p>
               <p className="form-hint">You will receive Confirmation letter at your email</p>
             </div>
-            <button className="action-btn">Edit</button>
+            <button className="action-btn-secondary">Edit</button>
           </div>
         </div>
 
         <div className="form-group">
           <label className="checkbox-label">
-            <input type="checkbox" />
+            <input type="checkbox" className="checkbox-input" />
             <span>I don't want to receive personalized ads.</span>
           </label>
         </div>
 
         <div className="form-group">
           <label className="checkbox-label">
-            <input type="checkbox" />
+            <input type="checkbox" className="checkbox-input" />
             <span>
               I don't want the information obtained based on the actions inside the <strong>WatchParty</strong> to be
               transferred to third-party applications.
@@ -216,7 +545,9 @@ function SecuritySection() {
         <p className="security-card-text">
           We use advanced encryption methods to ensure maximum security of your account
         </p>
-        <img src="/security-lock.jpg" alt="Security" className="security-image" />
+        <div className="security-illustration">
+          <div style={{ fontSize: "6rem" }}>🔒</div>
+        </div>
       </div>
     </div>
   )
@@ -224,14 +555,14 @@ function SecuritySection() {
 
 function BillingSection() {
   return (
-    <div className="section-content-full">
-      <div className="billing-layout">
+    <div className="billing-content">
+      <div className="billing-top-section">
         <div className="billing-form">
           <h3 className="section-subtitle">Payment Information</h3>
 
           <div className="form-group">
             <label className="form-label">Card Number</label>
-            <input type="text" className="form-input" placeholder="1234 5678 9012 3456" />
+            <input type="text" className="form-input" placeholder="1234 5678 9012 3456" maxLength="19" />
           </div>
 
           <div className="form-group">
@@ -242,20 +573,22 @@ function BillingSection() {
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">Expires On :</label>
-              <input type="text" className="form-input" placeholder="MM/YY" />
+              <input type="text" className="form-input" placeholder="MM/YY" maxLength="5" />
             </div>
             <div className="form-group">
               <label className="form-label">CVV :</label>
-              <input type="text" className="form-input" placeholder="123" />
+              <input type="text" className="form-input" placeholder="123" maxLength="4" />
             </div>
           </div>
 
-          <button className="save-btn">Save billing information</button>
+          <button className="save-billing-btn">Save billing information</button>
         </div>
 
         <div className="payment-method-card">
           <h3 className="section-subtitle">Payment Method</h3>
-          <img src="/credit-cards.jpg" alt="Credit cards" className="cards-image" />
+          <div className="cards-illustration">
+            <div style={{ fontSize: "4rem", marginTop: "2rem" }}>💳</div>
+          </div>
           <p className="security-note">All your payment data is securely protected</p>
         </div>
       </div>
@@ -263,7 +596,7 @@ function BillingSection() {
       <div className="subscription-section">
         <h3 className="section-subtitle">Subscription Plans</h3>
         <div className="subscription-placeholder">
-          <p>No active subscriptions</p>
+          <p className="placeholder-text">No active subscriptions</p>
         </div>
       </div>
     </div>

@@ -1,12 +1,15 @@
-"use client"
+// src/pages/home-page.jsx
 
-import Header from "../components/header"
+// import Header from "../components/header" // <-- ЛИШНИЙ импорт по-прежнему удален
+import { Link } from "react-router-dom" // <-- ИСПОЛЬЗУЕМ Link для навигации
 import "./home-page.css"
 
-export default function HomePage({ navigate }) {
+// export default function HomePage({ navigate }) { // <-- Пропсы navigate НЕ НУЖНЫ
+export default function HomePage() {
   return (
+    // Возвращаем вашу оригинальную обертку, она важна для стилей
     <div className="page-container">
-      <Header currentPage="home" navigate={navigate} />
+      {/* <Header /> <-- Этот вызов по-прежнему ЛИШНИЙ */}
 
       <main className="home-main">
         {/* Hero Section */}
@@ -24,7 +27,7 @@ export default function HomePage({ navigate }) {
         <section className="cta-section">
           <div className="cta-card">
             <h2 className="cta-title">Join any room now, registration is not needed</h2>
-            <a href="/rooms" className="cta-button">
+            <Link to="/rooms" className="cta-button">
               Explore Rooms
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path
@@ -35,7 +38,7 @@ export default function HomePage({ navigate }) {
                   strokeLinejoin="round"
                 />
               </svg>
-            </a>
+            </Link>
             <div className="cta-illustration">
               <img src="/two-people-sitting-on-orange-couch-watching-tv-tog.jpg" alt="People watching together" />
             </div>
@@ -46,12 +49,12 @@ export default function HomePage({ navigate }) {
             <p className="cta-description">
               In order to provide high quality services we allow only registered users to create and host rooms, you can
               read more about it in{" "}
-              <a href="/about" className="cta-link">
+              <Link to="/about" className="cta-link">
                 About Us
-              </a>{" "}
+              </Link>{" "}
               page
             </p>
-            <a href="/auth" className="cta-button">
+            <Link to="/auth" className="cta-button">
               Sign In
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path
@@ -62,14 +65,14 @@ export default function HomePage({ navigate }) {
                   strokeLinejoin="round"
                 />
               </svg>
-            </a>
+            </Link>
           </div>
         </section>
 
         {/* Features Section */}
         <section className="features-section">
           <div className="feature-card">
-            <div className="feature-icon" style={{ backgroundColor: "#5cb753" }}>
+            <div className="feature-icon" style={{ backgroundColor: "#4ade80" }}>
               <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
                 <path
                   d="M32 8C32 8 24 16 24 24C24 28.4183 27.5817 32 32 32C36.4183 32 40 28.4183 40 24C40 16 32 8 32 8Z"
@@ -86,7 +89,7 @@ export default function HomePage({ navigate }) {
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon" style={{ backgroundColor: "#5cb753" }}>
+            <div className="feature-icon" style={{ backgroundColor: "#4ade80" }}>
               <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
                 <rect x="12" y="16" width="40" height="32" rx="4" fill="currentColor" />
                 <circle cx="20" cy="28" r="2" fill="#1a1a1a" />
@@ -99,7 +102,7 @@ export default function HomePage({ navigate }) {
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon" style={{ backgroundColor: "#5cb753" }}>
+            <div className="feature-icon" style={{ backgroundColor: "#4ade80" }}>
               <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
                 <rect x="16" y="12" width="32" height="40" rx="2" fill="currentColor" />
                 <rect x="22" y="20" width="20" height="3" rx="1.5" fill="#1a1a1a" />
@@ -118,12 +121,11 @@ export default function HomePage({ navigate }) {
         {/* Platforms Section */}
         <section className="platforms-section">
           <h2 className="section-title">Watch Anything Together</h2>
-
           <div className="platform-cards">
             <div className="platform-card">
               <div className="platform-icon" style={{ backgroundColor: "#ff0000" }}>
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="white">
-                  <path d="M70 25C70 25 69 19 66 16C62.5 12.5 58.5 12.5 56.5 12.25C47.5 11.5 40 11.5 40 11.5C40 11.5 32.5 11.5 23.5 12.25C21.5 12.5 17.5 12.5 14 16C11 19 10 25 10 25C10 25 9 32 9 39V46C9 53 10 60 10 60C10 60 11 66 14 69C17.5 72.5 22 72.5 24 72.75C31 73.5 40 73.5 40 73.5C40 73.5 47.5 73.5 56.5 72.75C58.5 72.5 62.5 72.5 66 69C69 66 70 60 70 60C70 60 71 53 71 46V39C71 32 70 25 70 25ZM32 54V28L52 41L32 54Z" />
+                <svg width="80" height="56" viewBox="0 0 80 56" fill="white">
+                  <path d="M78.4 8.7s-.8-5.4-3.1-7.8c-3-3.1-6.3-3.1-7.8-3.3C56.6 0 40 0 40 0s-16.6 0-27.5 1.6c-1.5.2-4.8.2-7.8 3.3C2.4 7.3 1.6 12.7 1.6 12.7S0 19.1 0 25.5v6c0 6.4 1.6 12.8 1.6 12.8s.8 5.4 3.1 7.8c3 3.1 6.9 3 8.7 3.3 6.3.6 26.6.8 26.6.8s16.6 0 27.5-1.6c1.5-.2 4.8-.2 7.8-3.3 2.3-2.4 3.1-7.8 3.1-7.8S80 37.9 80 31.5v-6c0-6.4-1.6-12.8-1.6-12.8zM31.7 38.1V15.9L53.3 27 31.7 38.1z" />
                 </svg>
               </div>
               <h3 className="platform-title">Youtube</h3>
@@ -131,18 +133,10 @@ export default function HomePage({ navigate }) {
             </div>
 
             <div className="platform-card">
-              <div className="platform-icon" style={{ backgroundColor: "#f4b942" }}>
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="white">
-                  <path d="M60 20H20C17.2386 20 15 22.2386 15 25V55C15 57.7614 17.2386 60 20 60H60C62.7614 60 65 57.7614 65 55V25C65 22.2386 62.7614 20 60 20Z" />
-                  <path d="M30 35L45 45L30 55V35Z" fill="#f4b942" />
-                  <path
-                    d="M50 30L60 40L50 50"
-                    stroke="white"
-                    strokeWidth="3"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+              <div className="platform-icon" style={{ backgroundColor: "#fbbf24" }}>
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="white">
+                  <path d="M32 8L8 20V32C8 44 16 54 32 56C48 54 56 44 56 32V20L32 8Z" />
+                  <path d="M28 32L24 36L28 40L36 32L28 24L24 28L28 32Z" fill="#1a1a1a" />
                 </svg>
               </div>
               <h3 className="platform-title">File</h3>
@@ -151,12 +145,7 @@ export default function HomePage({ navigate }) {
 
             <div className="platform-card">
               <div className="platform-icon" style={{ backgroundColor: "#e50914" }}>
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="white">
-                  <path d="M25 15L35 65H30L20 15H25Z" />
-                  <path d="M35 15V65H40V15H35Z" />
-                  <path d="M40 15L50 65H55L45 15H40Z" />
-                  <path d="M55 15V65H60V15H55Z" />
-                </svg>
+                <span style={{ fontSize: "4rem", fontWeight: "bold" }}>N</span>
               </div>
               <h3 className="platform-title">Netflix</h3>
               <p className="platform-description">Enjoy watching movies and TV series from Netflix.</p>

@@ -2,68 +2,125 @@
 
 import { createContext, useContext, useState, useEffect } from "react"
 
-const AuthContext = createContext(null)
+const AuthContext = createContext()
 
-// Test account credentials
-const TEST_ACCOUNT = {
-  email: "tima@gmail.com",
-  password: "test123123",
-  username: "NeArlan",
-  name: "Arlan",
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider")
+  }
+  return context
 }
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
 
-  // Check for saved session on mount
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
   useEffect(() => {
-    const savedUser = localStorage.getItem("watchparty_user")
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
-    }
-    setIsLoading(false)
+    checkAuth()
   }, [])
 
-  const login = (email, password) => {
-    // Check against test account
-    if (email === TEST_ACCOUNT.email && password === TEST_ACCOUNT.password) {
-      const userData = {
-        email: TEST_ACCOUNT.email,
-        username: TEST_ACCOUNT.username,
-        name: TEST_ACCOUNT.name,
-      }
-      setUser(userData)
-      localStorage.setItem("watchparty_user", JSON.stringify(userData))
-      return { success: true }
+  const checkAuth = async () => {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      setLoading(false)
+      return
     }
-    return { success: false, error: "Invalid credentials" }
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setUser(data.data.user)
+        setIsAuthenticated(true)
+      } else {
+        localStorage.removeItem("token")
+        setUser(null)
+        setIsAuthenticated(false)
+      }
+    } catch (error) {
+      console.error("Auth check failed:", error)
+      localStorage.removeItem("token")
+      setUser(null)
+      setIsAuthenticated(false)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const login = async (email, password) => {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        localStorage.setItem("token", data.data.token)
+        setUser(data.data.user)
+        setIsAuthenticated(true)
+        return { success: true }
+      } else {
+        return { success: false, message: data.message }
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      return { success: false, message: "Network error" }
+    }
+  }
+
+  const register = async (email, username, password, name) => {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, username, password, name }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        localStorage.setItem("token", data.data.token)
+        setUser(data.data.user)
+        setIsAuthenticated(true)
+        return { success: true }
+      } else {
+        return { success: false, message: data.message }
+      }
+    } catch (error) {
+      console.error("Register error:", error)
+      return { success: false, message: "Network error" }
+    }
   }
 
   const logout = () => {
+    localStorage.removeItem("token")
     setUser(null)
-    localStorage.removeItem("watchparty_user")
+    setIsAuthenticated(false)
   }
 
-  const register = (email, password) => {
-    // For now, just simulate registration
-    const userData = {
-      email,
-      username: email.split("@")[0],
-      name: email.split("@")[0],
-    }
-    setUser(userData)
-    localStorage.setItem("watchparty_user", JSON.stringify(userData))
-    return { success: true }
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser)
   }
 
-  return <AuthContext.Provider value={{ user, login, logout, register, isLoading }}>{children}</AuthContext.Provider>
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider")
-  }
-  return context
+  return (
+    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, register, logout, updateUser }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }

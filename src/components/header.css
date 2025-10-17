@@ -1,43 +1,66 @@
+/* Redesigned header to match screenshot with WatchParty branding */
 .header {
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  background-color: #1a1a1a;
-  border-bottom: 1px solid #282828;
 }
 
 .logo {
-  font-family: "Brush Script MT", cursive;
-  font-size: 2rem;
-  color: #ffffff;
-  font-weight: 400;
+  font-size: 1.75rem;
+  font-weight: 700;
   font-style: italic;
+  color: var(--text-primary);
+  transition: color 0.2s;
+}
+
+.logo:hover {
+  color: var(--accent-primary);
 }
 
 .nav {
   display: flex;
-  gap: 2rem;
-  flex: 1;
-  justify-content: center;
+  gap: 2.5rem;
+  align-items: center;
 }
 
 .nav-link {
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 1.25rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 3px solid transparent;
-  transition: border-color 0.2s;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 1.125rem;
+  transition: color 0.2s;
   position: relative;
-}
-
-.nav-link.active {
-  border-bottom-color: #5cb753;
+  padding-bottom: 0.25rem;
 }
 
 .nav-link:hover {
-  border-bottom-color: #5cb753;
+  color: var(--text-primary);
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -1.25rem;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background-color: var(--accent-primary);
+  transition: width 0.3s;
+}
+
+.nav-link:hover::after {
+  width: 100%;
 }
 
 .header-actions {
@@ -46,98 +69,100 @@
   gap: 1rem;
 }
 
-.sign-in-btn,
-.sign-out-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.5rem;
-  background-color: transparent;
-  color: #ffffff;
-  border: 2px solid #ffffff;
-  border-radius: 2rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-decoration: none;
-}
-
-.sign-in-btn:hover,
-.sign-out-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.sign-out-btn {
-  background-color: #8b4545;
-  border-color: #8b4545;
-}
-
-.sign-out-btn:hover {
-  background-color: #a04545;
-}
-
-.create-room-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  background-color: #5cb753;
+/* Improved styling for create room button */
+.btn-create-room-header {
+  background: var(--accent-primary);
   border: none;
   border-radius: 50%;
-  color: #ffffff;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.create-room-btn:hover {
-  background-color: #4a9642;
-}
-
-/* Added account button styles */
-.account-btn {
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  background-color: transparent;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  color: #ffffff;
-  cursor: pointer;
   transition: all 0.2s;
+  cursor: pointer;
+  color: white;
+  box-shadow: 0 2px 8px rgba(74, 222, 128, 0.3);
 }
 
-.account-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: #5cb753;
-  color: #5cb753;
+.btn-create-room-header:hover {
+  background: #22c55e;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(74, 222, 128, 0.4);
 }
 
+/* Improved theme toggle button styling */
 .theme-toggle {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.theme-btn {
-  width: 2.5rem;
-  height: 2.5rem;
-  background-color: transparent;
-  border: none;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
   border-radius: 50%;
-  color: #666;
-  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  cursor: pointer;
+  color: var(--text-primary);
 }
 
-.theme-btn.active {
-  color: #5cb753;
+.theme-toggle:hover {
+  background: var(--bg-hover);
+  transform: scale(1.05);
+  border-color: var(--accent-primary);
 }
 
-.theme-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.theme-toggle svg {
+  color: var(--text-primary);
+}
+
+.btn-login {
+  background-color: transparent;
+  color: var(--text-primary);
+  padding: 0.625rem 1.75rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: 2px solid var(--text-primary);
+  font-size: 1rem;
+}
+
+.btn-login:hover {
+  background-color: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.btn-logout {
+  background-color: #dc2626;
+  color: white;
+  padding: 0.625rem 1.75rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: none;
+  font-size: 1rem;
+}
+
+.btn-logout:hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem;
+  }
+
+  .nav {
+    gap: 1rem;
+  }
+
+  .nav-link {
+    font-size: 0.9rem;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+  }
 }
