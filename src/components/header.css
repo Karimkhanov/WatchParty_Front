@@ -1,4 +1,3 @@
-/* Redesigned header to match screenshot with WatchParty branding */
 .header {
   background-color: var(--bg-primary);
   border-bottom: 1px solid var(--border-color);
@@ -69,7 +68,6 @@
   gap: 1rem;
 }
 
-/* Improved styling for create room button */
 .btn-create-room-header {
   background: var(--accent-primary);
   border: none;
@@ -91,7 +89,7 @@
   box-shadow: 0 4px 12px rgba(74, 222, 128, 0.4);
 }
 
-/* Improved theme toggle button styling */
+
 .theme-toggle {
   background: var(--bg-secondary);
   border: 2px solid var(--border-color);

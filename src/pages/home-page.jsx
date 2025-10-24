@@ -1,15 +1,13 @@
 // src/pages/home-page.jsx
 
-// import Header from "../components/header" // <-- ЛИШНИЙ импорт по-прежнему удален
-import { Link } from "react-router-dom" // <-- ИСПОЛЬЗУЕМ Link для навигации
+import { Link } from "react-router-dom" 
 import "./home-page.css"
 
-// export default function HomePage({ navigate }) { // <-- Пропсы navigate НЕ НУЖНЫ
 export default function HomePage() {
   return (
-    // Возвращаем вашу оригинальную обертку, она важна для стилей
+
     <div className="page-container">
-      {/* <Header /> <-- Этот вызов по-прежнему ЛИШНИЙ */}
+      {}
 
       <main className="home-main">
         {/* Hero Section */}

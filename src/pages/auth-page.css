@@ -1,4 +1,3 @@
-/* Redesigned auth page to match screenshot styling */
 .auth-container {
   min-height: calc(100vh - 80px);
   background-color: var(--bg-primary);

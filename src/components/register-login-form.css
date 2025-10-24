@@ -4,7 +4,6 @@
   color: #ffffff;
 }
 
-/* Header Styles */
 .header {
   display: flex;
   align-items: center;
@@ -197,7 +196,6 @@
   background-color: #146c43;
 }
 
-/* Added forgot password link styles */
 .forgot-password {
   display: block;
   text-align: center;
@@ -215,7 +213,6 @@
   color: #a0a0a0;
 }
 
-/* Added helper text styles for forgot password flow */
 .helper-text {
   color: #888888;
   font-size: 0.875rem;

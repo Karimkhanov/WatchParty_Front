@@ -1,15 +1,10 @@
-// src/pages/about-page.jsx
-
-// import Header from "../components/header"; // <-- ЛИШНИЙ импорт удален
-import { Link } from "react-router-dom";     // <-- ИСПОЛЬЗУЕМ Link для навигации
+import { Link } from "react-router-dom";  
 import "./about-page.css";
 
-// export default function AboutPage({ navigate }) { // <-- Пропс navigate НЕ НУЖЕН
 export default function AboutPage() {
   return (
-    // Возвращаем вашу оригинальную обертку, она важна для стилей
     <div className="page-container">
-      {/* <Header /> <-- Этот вызов по-прежнему ЛИШНИЙ и удален */}
+      {}
 
       <main className="about-main">
         <section className="about-hero">
