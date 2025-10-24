@@ -118,4 +118,5 @@ This project is designed to work with the [**WatchParty API (W2G_Backend)**](htt
 Micro Frontend and Micro Back links:
 
 [**WatchParty API (W2G_chat-service)**]([https://github.com/Karimkhanov/WatchParty_Back/tree/main](https://github.com/Arlan-Z/watchparty-nodejs-chat-service))
+
 [**WatchParty API (W2G_Room)**](https://github.com/Arlan-Z/watchparty-room)
