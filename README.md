@@ -114,3 +114,8 @@ The `package.json` file defines the following scripts for you to use:
 ## 🤝 Backend Interaction
 
 This project is designed to work with the [**WatchParty API (W2G_Backend)**](https://github.com/Karimkhanov/WatchParty_Back/tree/main). All API requests for authentication, room data, and user profiles are sent to the URL defined in the `VITE_API_URL` environment variable.
+
+Micro Frontend and Micro Back links:
+
+[**WatchParty API (W2G_chat-service)**]([https://github.com/Karimkhanov/WatchParty_Back/tree/main](https://github.com/Arlan-Z/watchparty-nodejs-chat-service))
+[**WatchParty API (W2G_Room)**](https://github.com/Arlan-Z/watchparty-room)
