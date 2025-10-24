@@ -118,4 +118,4 @@ This project is designed to work with the [**WatchParty API (W2G_Backend)**](htt
 ### Project Microservices
 
 *   [**WatchParty API (Chat Service)**](https://github.com/Arlan-Z/watchparty-nodejs-chat-service)
-*   [**WatchParty API (Room Service)**](https://github.com/Arlan-Z/watchparty-room)
+*   [**WatchParty API (Watchparty-room)**](https://github.com/Arlan-Z/watchparty-room)
