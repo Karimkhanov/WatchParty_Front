@@ -80,17 +80,31 @@ export default function AuthPage() {
     setError("")
     setLoading(true)
 
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+
     try {
-      // TODO: Implement actual forgot password API call
-      // await apiClient.post("/auth/forgot-password", { email: formData.email })
-      setSuccessMessage("Password reset link has been sent to your email!")
-      setTimeout(() => {
-        setShowForgotPassword(false)
-        setSuccessMessage("")
-        setActiveTab("login")
-      }, 3000)
+      const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: formData.email }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setSuccessMessage(data.message)
+        setTimeout(() => {
+          setShowForgotPassword(false)
+          setSuccessMessage("")
+          setActiveTab("login")
+        }, 3000)
+      } else {
+        setError(data.message || "Failed to send reset email")
+      }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to send reset email")
+      setError("Failed to send reset email. Please try again.")
     } finally {
       setLoading(false)
     }
