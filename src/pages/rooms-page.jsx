@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "../contexts/auth-context"
+import { useSelector } from "react-redux"
 import apiClient from "../api"
 import CreateRoomModal from "../components/create-room-modal"
 import "./rooms-page.css"
@@ -11,7 +11,7 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState([])
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const { user } = useAuth()
+  const user = useSelector((state) => state.auth.user) 
   const navigate = useNavigate()
 
   useEffect(() => {

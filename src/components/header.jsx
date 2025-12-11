@@ -1,17 +1,19 @@
 "use client"
 
 import { Link, useNavigate } from "react-router-dom"
-import { useAuth } from "../contexts/auth-context"
+import { useAuth } from "../contexts/AuthContext" 
 import { useTheme } from "../contexts/theme-context"
+import { useSelector } from "react-redux"
 import "./header.css"
 
 function Header() {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth() 
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
+  const user = useSelector((state) => state.auth.user)
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate("/")
   }
 
@@ -26,30 +28,23 @@ function Header() {
           <Link to="/" className="nav-link">
             Home
           </Link>
-          {user && (
-            <Link to="/account" className="nav-link">
-              Account
-            </Link>
-          )}
+          <Link to="/movies" className="nav-link">
+            Movies
+          </Link>
           <Link to="/rooms" className="nav-link">
             Rooms
           </Link>
+          {user && (
+            <Link to="/favorites" className="nav-link">
+              Favorites
+            </Link>
+          )}
           <Link to="/about" className="nav-link">
             About Us
           </Link>
         </nav>
 
         <div className="header-actions">
-          {user && (
-            <button className="btn-create-room-header" onClick={() => navigate("/rooms")} title="Create Room">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="16" />
-                <line x1="8" y1="12" x2="16" y2="12" />
-              </svg>
-            </button>
-          )}
-
           <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
             {theme === "dark" ? (
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -78,31 +73,31 @@ function Header() {
           </button>
 
           {user ? (
-            <button onClick={handleLogout} className="btn-logout">
-              Sign Out
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-                style={{ marginLeft: "0.5rem", display: "inline" }}
-              >
-                <path d="M6 14L12 8L6 2" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-              </svg>
-            </button>
+            <>
+              <Link to="/profile" className="user-link">
+                <div className="user-avatar">
+                  {user.profilePicture ? (
+                    <img src={user.profilePicture || "/placeholder.svg"} alt={user.displayName || user.username} />
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                  )}
+                </div>
+              </Link>
+              <button onClick={handleLogout} className="btn-logout">
+                Sign Out
+              </button>
+            </>
           ) : (
-            <Link to="/auth" className="btn-login">
-              Sign In
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-                style={{ marginLeft: "0.5rem", display: "inline" }}
-              >
-                <path d="M6 14L12 8L6 2" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-              </svg>
-            </Link>
+            <>
+              <Link to="/login" className="btn-login">
+                Sign In
+              </Link>
+              <Link to="/signup" className="btn-signup">
+                Sign Up
+              </Link>
+            </>
           )}
         </div>
       </div>

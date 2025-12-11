@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { useAuth } from "../contexts/auth-context"
+import { useAuth } from "../contexts/AuthContext"
 import apiClient from "../api"
 import Chat from "../components/chat"
 import CreateRoomModal from "../components/create-room-modal"

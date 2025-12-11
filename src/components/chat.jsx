@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useAuth } from "../contexts/auth-context"
+import { useAuth } from "../contexts/AuthContext"
 import apiClient from "../api"
 import "./chat.css"
 

@@ -1,0 +1,261 @@
+.movie-details-main {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  padding-bottom: 3rem;
+}
+
+.backdrop {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  background: var(--muted);
+}
+
+.backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.details-container {
+  max-width: 1200px;
+  margin: -100px auto 0;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.details-header {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+.poster-section {
+  flex-shrink: 0;
+}
+
+.poster-image {
+  width: 100%;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.info-section h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.meta-info {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.meta-info span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted-foreground);
+}
+
+.rating {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.genre-tag {
+  background: var(--primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.overview {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: var(--foreground);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.favorite-btn,
+.watch-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.favorite-btn {
+  background: var(--card);
+  border: 2px solid var(--border);
+  color: var(--foreground);
+}
+
+.favorite-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.watch-btn {
+  background: var(--primary);
+  color: white;
+}
+
+.watch-btn:hover {
+  opacity: 0.9;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin: 3rem 0;
+  padding: 2rem;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.detail-item h3 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  margin-bottom: 0.5rem;
+}
+
+.detail-item p {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.cast-section,
+.recommendations-section {
+  margin: 3rem 0;
+}
+
+.cast-section h2,
+.recommendations-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.cast-grid,
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+
+.cast-member,
+.recommendation-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.cast-member:hover,
+.recommendation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.cast-member img,
+.recommendation-card img {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.cast-member h4,
+.recommendation-card h4 {
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.cast-member p {
+  padding: 0 0.75rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+.back-button {
+  margin: 2rem auto;
+  display: block;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.movie-details-main.loading,
+.movie-details-main.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .backdrop {
+    height: 200px;
+  }
+
+  .details-header {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: -50px 0 2rem 0;
+  }
+
+  .info-section h1 {
+    font-size: 1.8rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .cast-grid,
+  .recommendations-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}

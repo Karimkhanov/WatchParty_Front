@@ -1,15 +1,16 @@
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../contexts/auth-context';
+"use client"
+
+import { Navigate, Outlet } from "react-router-dom"
+import { useSelector } from "react-redux"
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useSelector((state) => state.auth)
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="loading-container">Loading...</div>
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/auth" />;
-};
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />
+}
 
-export default ProtectedRoute;
+export default ProtectedRoute
