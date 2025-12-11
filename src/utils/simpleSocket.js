@@ -1,123 +1,82 @@
-import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import { v4 as uuidv4 } from "uuid";
+export function connectToSocketServer(url, handlers = {}) {
+  return new Promise((resolve, reject) => {
+    const wsUrl = `${url.replace(/^http/, "ws")}/socket.io/?EIO=4&transport=websocket`
+    const socket = new WebSocket(wsUrl)
+    let pingIntervalId
+    let isReady = false
 
-const app = express();
-const server = createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] }
-});
-
-app.use(express.json());
-
-/**
- * {
- *   id: string,
- *   videoUrl: string,
- *   createdAt: Date,
- *   host: string | null,
- *   viewers: Set<string>,
- *   currentTime: number,
- *   isPlaying: boolean
- * }
- */
-const rooms = new Map();
-
-app.get("/api/rooms", (req, res) => {
-  const serializedRooms = Array.from(rooms.values()).map(room => ({
-    id: room.id,
-    videoUrl: room.videoUrl,
-    createdAt: room.createdAt,
-    currentTime: room.currentTime,
-    isPlaying: room.isPlaying,
-    viewerCount: room.viewers.size,
-  }));
-
-  res.json({ rooms: serializedRooms });
-});
-
-app.post("/api/rooms", (req, res) => {
-  const { videoUrl } = req.body;
-  if (!videoUrl) return res.status(400).json({ error: "videoUrl required" });
-
-  const roomId = uuidv4();
-  rooms.set(roomId, {
-    id: roomId,
-    videoUrl,
-    createdAt: new Date(),
-    host: null,
-    viewers: new Set(),
-    currentTime: 0,
-    isPlaying: false,
-  });
-
-  console.log(`🎬 Created room: ${roomId} (${videoUrl})`);
-  res.json({ roomId, videoUrl });
-});
-
-app.get("/api/rooms/:roomId", (req, res) => {
-  const room = rooms.get(req.params.roomId);
-  if (!room) return res.status(404).json({ error: "Room not found" });
-  res.json({
-    id: room.id,
-    videoUrl: room.videoUrl,
-    currentTime: room.currentTime,
-    isPlaying: room.isPlaying,
-  });
-});
-
-io.on("connection", socket => {
-  console.log(`🟢 Client connected: ${socket.id}`);
-
-  socket.on("joinRoom", ({ roomId, userId }) => {
-    const room = rooms.get(roomId);
-    if (!room) {
-      socket.emit("error", "Room not found");
-      return;
+    const cleanup = () => {
+      if (pingIntervalId) {
+        clearInterval(pingIntervalId)
+      }
     }
 
-    socket.join(roomId);
-    room.viewers.add(userId);
-
-    let currentTime = room.currentTime;
-    if (room.isPlaying && room.lastUpdate) {
-      const delta = (Date.now() - room.lastUpdate) / 1000;
-      currentTime += delta;
+    const emit = (event, payload = {}) => {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(`42${JSON.stringify([event, payload])}`)
+      }
     }
 
-    socket.emit("syncState", {
-      videoUrl: room.videoUrl,
-      currentTime,
-      isPlaying: room.isPlaying,
-    });
-
-    socket.to(roomId).emit("userJoined", { userId });
-  });
-
-  socket.on("videoEvent", ({ roomId, type, currentTime }) => {
-    const room = rooms.get(roomId);
-    if (!room) return;
-
-    if (type === "play") {
-      room.isPlaying = true;
-      room.lastUpdate = Date.now();
-      room.currentTime = currentTime;
-    } else if (type === "pause") {
-      room.isPlaying = false;
-      room.currentTime = currentTime;
-    } else if (type === "seek") {
-      room.currentTime = currentTime;
+    const close = () => {
+      cleanup()
+      socket.close()
     }
 
-    socket.to(roomId).emit("videoEvent", { type, currentTime });
-  });
+    const handleMessage = (message) => {
+      if (message === "2") {
+        socket.send("3")
+        return
+      }
 
-  socket.on("disconnect", () => {
-    console.log(`🔴 Client disconnected: ${socket.id}`);
-  });
-});
+      if (message.startsWith("0")) {
+        try {
+          const payload = JSON.parse(message.slice(1))
+          if (payload.pingInterval) {
+            pingIntervalId = setInterval(() => {
+              if (socket.readyState === WebSocket.OPEN) {
+                socket.send("2")
+              }
+            }, payload.pingInterval)
+          }
+        } catch (error) {
+          console.warn("Failed to parse socket handshake", error)
+        }
+        socket.send("40")
+        return
+      }
 
-server.listen(4000, () => {
-  console.log("✅ WatchParty Room server running on http://localhost:4000");
-});
+      if (message === "40") {
+        isReady = true
+        resolve({ emit, close })
+        handlers.onConnect?.()
+        return
+      }
+
+      if (!message.startsWith("42")) return
+
+      try {
+        const [event, payload] = JSON.parse(message.slice(2))
+        if (event === "syncState") handlers.onSyncState?.(payload)
+        if (event === "videoEvent") handlers.onVideoEvent?.(payload)
+        if (event === "error") handlers.onError?.(payload)
+      } catch (error) {
+        console.warn("Failed to parse socket message", error)
+      }
+    }
+
+    socket.onmessage = (event) => handleMessage(event.data)
+
+    socket.onerror = (err) => {
+      cleanup()
+      if (!isReady) {
+        reject(err)
+      }
+      handlers.onError?.("Unable to reach the room server.")
+    }
+
+    socket.onclose = () => {
+      cleanup()
+      handlers.onDisconnect?.()
+    }
+  })
+}
