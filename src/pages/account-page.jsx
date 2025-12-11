@@ -5,8 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/auth-context"
 import { showToast } from "../components/toast"
 import "./account-page.css"
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+import { API_URL } from "../config"
 
 export default function AccountPage() {
   const { user, loading, isAuthenticated, updateUser } = useAuth()
