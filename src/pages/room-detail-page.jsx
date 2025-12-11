@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { fetchRoom } from "../services/roomService"
 import { connectToSocketServer } from "../utils/simpleSocket"
+import { API_URL, STREAMING_SERVICE_URL } from "../config"
 import "./room-detail-page.css"
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:4000"
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL || API_URL || STREAMING_SERVICE_URL
 
 export default function RoomDetailPage() {
   const { roomId } = useParams()

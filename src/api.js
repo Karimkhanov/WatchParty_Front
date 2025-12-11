@@ -1,8 +1,11 @@
 import axios from "axios"
+import { API_URL, STREAMING_SERVICE_URL } from "./config"
+
+const apiBaseUrl = `${(API_URL || STREAMING_SERVICE_URL).replace(/\/$/, "")}/api`
 
 const apiClient = axios.create({
-  baseURL: "/api", 
-  withCredentials: true 
+  baseURL: apiBaseUrl,
+  withCredentials: true,
 })
 
 apiClient.interceptors.request.use(
