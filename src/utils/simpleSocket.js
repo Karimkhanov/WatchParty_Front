@@ -1,9 +1,7 @@
 const ensureLeadingSlash = (path) => (path.startsWith("/") ? path : `/${path}`)
 
-const stripTrailingSlash = (path = "") => path.replace(/\/+$/, "")
-
 const buildWebSocketUrl = (url = "") => {
-  const trimmed = stripTrailingSlash(url.trim())
+  const trimmed = url.replace(/\/$/, "")
 
   if (!trimmed) {
     return `/socket.io/?EIO=4&transport=websocket`
@@ -14,13 +12,11 @@ const buildWebSocketUrl = (url = "") => {
   if (hasProtocol) {
     const parsed = new URL(trimmed)
     const protocol = parsed.protocol === "https:" ? "wss:" : "ws:"
-    const basePath = parsed.pathname === "/" ? "" : stripTrailingSlash(parsed.pathname)
-    const socketPath = ensureLeadingSlash(`${basePath}/socket.io`)
-    const socketPathWithSlash = socketPath.endsWith("/") ? socketPath : `${socketPath}/`
-    return `${protocol}//${parsed.host}${socketPathWithSlash}?EIO=4&transport=websocket`
+    const pathname = ensureLeadingSlash(`${parsed.pathname}/socket.io/`).replace(/\/+$/, "/")
+    return `${protocol}//${parsed.host}${pathname}?EIO=4&transport=websocket`
   }
 
-  const normalizedPath = stripTrailingSlash(ensureLeadingSlash(trimmed))
+  const normalizedPath = ensureLeadingSlash(trimmed)
   return `${normalizedPath}/socket.io/?EIO=4&transport=websocket`
 }
 
@@ -30,6 +26,13 @@ export function connectToSocketServer(url, handlers = {}) {
     const socket = new WebSocket(wsUrl)
     let pingIntervalId
     let isReady = false
+
+    const markReady = () => {
+      if (isReady) return
+      isReady = true
+      resolve({ emit, close })
+      handlers.onConnect?.()
+    }
 
     const cleanup = () => {
       if (pingIntervalId) {
@@ -68,13 +71,12 @@ export function connectToSocketServer(url, handlers = {}) {
           console.warn("Failed to parse socket handshake", error)
         }
         socket.send("40")
+        markReady()
         return
       }
 
       if (message.startsWith("40")) {
-        isReady = true
-        resolve({ emit, close })
-        handlers.onConnect?.()
+        markReady()
         return
       }
 

@@ -1,5 +1,4 @@
 import axios from "axios"
-import { API_URL, STREAMING_SERVICE_URL } from "./config"
 
 const apiBaseUrl = `/stream-service/api`
 

@@ -1,8 +1,9 @@
-import { useState, useRef } from "react"
-import "./Video.css"
-import { useVideoPlayer } from "../hooks/useVideoPlayer"
-import { useRoomSocket } from "../hooks/useRoomSocket"
-import { emitVideoEvent } from "../services/videoService"
+import { useState, useEffect, useRef } from "react";
+import { io } from "socket.io-client";
+import "./Video.css";
+import { useVideoPlayer } from "../hooks/useVideoPlayer";
+
+const SOCKET_URL = "/stream-service";
 
 const Video = ({ roomId }) => {
   const {
@@ -13,76 +14,160 @@ const Video = ({ roomId }) => {
     setVolume,
     isMuted,
     setIsMuted,
-    progress,
-  } = useVideoPlayer()
+    progress, 
+  } = useVideoPlayer();
 
-  const [videoUrl, setVideoUrl] = useState(null)
-  const socketRef = useRef(null)
+  const [videoUrl, setVideoUrl] = useState(null);
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimeout = useRef(null);
+  const socketRef = useRef(null);
 
-  const socket = useRoomSocket(roomId, videoRef, setVideoUrl, setIsPlaying)
-  if (socket && socketRef.current !== socket) {
-    socketRef.current = socket
-  }
+  const userId = useRef(
+    localStorage.getItem("watchparty_user_id") || 
+    Math.random().toString(36).substr(2, 9)
+  ).current;
+
+  useEffect(() => {
+    localStorage.setItem("watchparty_user_id", userId);
+
+    const socket = io(SOCKET_URL, {
+      transports: ["websocket"],
+      reconnection: true,
+    });
+    
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      console.log("🟢 Connected to Stream Server:", socket.id);
+      socket.emit("joinRoom", { roomId, userId });
+    });
+
+    socket.on("syncState", (state) => {
+      console.log("🔄 Sync State:", state);
+      setVideoUrl(state.videoUrl);
+      
+      const video = videoRef.current;
+      if (video) {
+        const syncTime = () => {
+          video.currentTime = state.currentTime;
+          if (state.isPlaying) {
+            video.play().catch((e) => console.warn("Autoplay blocked:", e));
+            setIsPlaying(true);
+          } else {
+            video.pause();
+            setIsPlaying(false);
+          }
+        };
+
+        if (video.readyState >= 1) {
+          syncTime();
+        } else {
+          video.onloadedmetadata = syncTime;
+        }
+      }
+    });
+
+    socket.on("videoEvent", ({ type, currentTime }) => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      const timeDiff = Math.abs(video.currentTime - currentTime);
+
+      switch (type) {
+        case "play":
+          video.currentTime = currentTime; 
+          video.play().catch(console.error);
+          setIsPlaying(true);
+          break;
+        case "pause":
+          video.pause();
+          setIsPlaying(false);
+          if (timeDiff > 0.5) video.currentTime = currentTime;
+          break;
+        case "seek":
+          video.currentTime = currentTime;
+          break;
+        default:
+          break;
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [roomId, userId, setIsPlaying, videoRef]);
+
+  const emitEvent = (type, time) => {
+    if (socketRef.current) {
+      socketRef.current.emit("videoEvent", {
+        roomId,
+        type,
+        currentTime: time,
+      });
+    }
+  };
+
 
   const handlePlayPause = () => {
-    const video = videoRef.current
-    if (!video) return
+    const video = videoRef.current;
+    if (!video) return;
 
     if (video.paused) {
-      video.play()
-      setIsPlaying(true)
-      emitVideoEvent(socketRef.current, roomId, "play", video.currentTime)
+      video.play();
+      setIsPlaying(true);
+      emitEvent("play", video.currentTime);
     } else {
-      video.pause()
-      setIsPlaying(false)
-      emitVideoEvent(socketRef.current, roomId, "pause", video.currentTime)
+      video.pause();
+      setIsPlaying(false);
+      emitEvent("pause", video.currentTime);
     }
-  }
+  };
+
+  const handleSeek = (e) => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    const seekValue = parseFloat(e.target.value);
+    const seekTime = (seekValue / 100) * (video.duration || 0);
+    
+    video.currentTime = seekTime;
+    emitEvent("seek", seekTime);
+  };
 
   const handleVolumeChange = (e) => {
-    const newVolume = parseFloat(e.target.value)
-    setVolume(newVolume)
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
     if (videoRef.current) {
-      videoRef.current.volume = newVolume
-      setIsMuted(newVolume === 0)
+      videoRef.current.volume = newVolume;
+      setIsMuted(newVolume === 0);
     }
-  }
+  };
 
   const toggleMute = () => {
     if (videoRef.current) {
-      videoRef.current.muted = !isMuted
-      setIsMuted(!isMuted)
+      const nextMutedState = !isMuted;
+      videoRef.current.muted = nextMutedState;
+      setIsMuted(nextMutedState);
     }
-  }
-
-  const handleSeek = (e) => {
-    const video = videoRef.current
-    if (!video) return
-    const seekTime = (parseFloat(e.target.value) / 100) * (video.duration || 0)
-    video.currentTime = seekTime
-    emitVideoEvent(socketRef.current, roomId, "seek", seekTime)
-  }
+  };
 
   const toggleFullScreen = () => {
     if (videoRef.current) {
       if (!document.fullscreenElement) {
-        videoRef.current.parentElement?.requestFullscreen()
+        videoRef.current.parentElement?.requestFullscreen();
       } else {
-        document.exitFullscreen()
+        document.exitFullscreen();
       }
     }
-  }
+  };
 
   const handleMouseMove = () => {
-    setShowControls(true)
-    clearTimeout(controlsTimeout.current)
+    setShowControls(true);
+    clearTimeout(controlsTimeout.current);
     if (isPlaying) {
-      controlsTimeout.current = setTimeout(() => setShowControls(false), 3000)
+      controlsTimeout.current = setTimeout(() => setShowControls(false), 3000);
     }
-  }
-
-  const [showControls, setShowControls] = useState(true)
-  const controlsTimeout = useRef(null)
+  };
 
   return (
     <div
@@ -90,19 +175,23 @@ const Video = ({ roomId }) => {
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
     >
+      {!videoUrl && <div className="video-placeholder">Waiting for host to select video...</div>}
+      
       <video
         ref={videoRef}
         className="video-player"
         src={videoUrl || undefined}
         onClick={handlePlayPause}
       />
+
       <div className={`video-controls ${showControls ? "visible" : ""}`}>
         <div className="progress-bar-wrapper">
           <input
             type="range"
             min="0"
             max="100"
-            value={progress}
+            step="0.1"
+            value={progress || 0}
             className="progress-bar"
             onChange={handleSeek}
           />
@@ -135,7 +224,7 @@ const Video = ({ roomId }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Video
+export default Video;
