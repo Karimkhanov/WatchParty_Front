@@ -1,8 +1,10 @@
 import axios from "axios"
 
+const apiBaseUrl = `/stream-service/api`
+
 const apiClient = axios.create({
-  baseURL: "/api", 
-  withCredentials: true 
+  baseURL: apiBaseUrl,
+  withCredentials: true,
 })
 
 apiClient.interceptors.request.use(

@@ -1,0 +1,38 @@
+.chat-wrapper {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  height: 100%;
+}
+
+.chat-header {
+  padding: 16px 20px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-title {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.chat-meta {
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+.chat-empty-state {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-secondary);
+}

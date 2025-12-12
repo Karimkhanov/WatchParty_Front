@@ -4,6 +4,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/auth-context"
+import { API_URL } from "../config"
 import "./auth-page.css"
 
 export default function AuthPage() {
@@ -79,8 +80,6 @@ export default function AuthPage() {
     e.preventDefault()
     setError("")
     setLoading(true)
-
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
 
     try {
       const response = await fetch(`${API_URL}/api/auth/forgot-password`, {

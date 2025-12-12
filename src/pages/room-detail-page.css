@@ -196,6 +196,10 @@
   line-height: 1.6;
 }
 
+.room-detail-fullscreen {
+  padding: 0;
+}
+
 .guest-form {
   margin-bottom: 2rem;
 }

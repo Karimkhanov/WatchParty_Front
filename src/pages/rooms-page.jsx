@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
-import apiClient from "../api"
 import CreateRoomModal from "../components/create-room-modal"
+import { createRoom, fetchRooms } from "../services/roomService"
 import "./rooms-page.css"
 
 export default function RoomsPage() {
@@ -15,13 +15,13 @@ export default function RoomsPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    fetchRooms()
+    loadRooms()
   }, [])
 
-  const fetchRooms = async () => {
+  const loadRooms = async () => {
     try {
-      const response = await apiClient.get("/rooms")
-      setRooms(response.data.data)
+      const roomList = await fetchRooms()
+      setRooms(roomList)
     } catch (error) {
       console.error("Failed to fetch rooms:", error)
     } finally {
@@ -35,10 +35,19 @@ export default function RoomsPage() {
 
   const handleCreateRoom = async (roomData) => {
     try {
-      const response = await apiClient.post("/rooms", roomData)
-      setRooms([response.data.data, ...rooms])
+      const response = await createRoom(roomData.video_url)
+      setRooms([
+        {
+          id: response.roomId,
+          videoUrl: response.videoUrl,
+          currentTime: 0,
+          isPlaying: false,
+          viewerCount: 0,
+        },
+        ...rooms,
+      ])
       setShowCreateModal(false)
-      navigate(`/room/${response.data.data.id}`)
+      navigate(`/room/${response.roomId}`)
     } catch (error) {
       console.error("Failed to create room:", error)
       alert(error.response?.data?.message || "Failed to create room")
@@ -74,27 +83,33 @@ export default function RoomsPage() {
         </div>
       ) : (
         <div className="rooms-grid">
-          {rooms.map((room) => (
-            <div key={room.id} className="room-card" onClick={() => handleRoomClick(room.id)}>
-              <div className="room-image">
-                <img
-                  src={room.thumbnail_url || "/placeholder.svg?height=280&width=200&query=movie poster"}
-                  alt={room.title}
-                />
-              </div>
-              <div className="room-info">
-                <h3 className="room-title">{room.title}</h3>
-                <div className="room-participants">
-                  <div className="participant-avatars">
-                    <div className="participant-avatar"></div>
-                    <div className="participant-avatar"></div>
-                    <div className="participant-avatar"></div>
+          {rooms.map((room) => {
+            const roomTitle = room.title || room.videoUrl || "Untitled Room"
+            const viewerCount = room.viewerCount ?? room.participant_count ?? 0
+
+            return (
+              <div key={room.id} className="room-card" onClick={() => handleRoomClick(room.id)}>
+                <div className="room-image">
+                  <img
+                    src={room.thumbnail_url || "/placeholder.svg?height=280&width=200&query=movie poster"}
+                    alt={roomTitle}
+                  />
+                </div>
+                <div className="room-info">
+                  <h3 className="room-title">{roomTitle}</h3>
+                  <p className="room-description">{room.videoUrl}</p>
+                  <div className="room-participants">
+                    <div className="participant-avatars">
+                      <div className="participant-avatar"></div>
+                      <div className="participant-avatar"></div>
+                      <div className="participant-avatar"></div>
+                    </div>
+                    <span className="participant-count">{viewerCount} watching</span>
                   </div>
-                  <span className="participant-count">+{room.participant_count || 3}</span>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
