@@ -13,6 +13,14 @@ export default defineConfig(({ mode }) => {
     return 'https://watchparty-nodejs-streaming-service.onrender.com'
   })()
 
+  const chatProxyTarget = (() => {
+    const target = env.VITE_CHAT_API_URL || env.VITE_CHAT_SOCKET_URL
+    if (target && /^https?:\/\//.test(target)) {
+      return target
+    }
+    return proxyTarget
+  })()
+
   return {
     plugins: [react()],
     server: {
@@ -27,6 +35,17 @@ export default defineConfig(({ mode }) => {
           ws: true,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/stream-service\/socket.io/, '/socket.io'),
+        },
+        '/chat-service/api': {
+          target: chatProxyTarget,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/chat-service\/api/, '/api'),
+        },
+        '/chat-service/socket.io': {
+          target: chatProxyTarget,
+          ws: true,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/chat-service\/socket.io/, '/socket.io'),
         },
       },
     },

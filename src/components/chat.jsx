@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { useAuth } from "../contexts/AuthContext"
+import { useState, useEffect, useRef, useCallback } from "react"
 import apiClient from "../api"
 import "./chat.css"
 
@@ -10,19 +9,7 @@ export default function Chat({ roomId, guestName }) {
   const [newMessage, setNewMessage] = useState("")
   const [loading, setLoading] = useState(true)
   const messagesEndRef = useRef(null)
-  const { user } = useAuth()
-
-  useEffect(() => {
-    fetchMessages()
-    const interval = setInterval(fetchMessages, 3000)
-    return () => clearInterval(interval)
-  }, [roomId])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       const response = await apiClient.get(`/chat/${roomId}/messages`)
       setMessages(response.data.data)
@@ -31,7 +18,17 @@ export default function Chat({ roomId, guestName }) {
       console.error("Failed to fetch messages:", error)
       setLoading(false)
     }
-  }
+  }, [roomId])
+
+  useEffect(() => {
+    fetchMessages()
+    const interval = setInterval(fetchMessages, 3000)
+    return () => clearInterval(interval)
+  }, [fetchMessages])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })

@@ -1,6 +1,32 @@
+const ensureLeadingSlash = (path) => (path.startsWith("/") ? path : `/${path}`)
+
+const stripTrailingSlash = (path = "") => path.replace(/\/+$/, "")
+
+const buildWebSocketUrl = (url = "") => {
+  const trimmed = stripTrailingSlash(url.trim())
+
+  if (!trimmed) {
+    return `/socket.io/?EIO=4&transport=websocket`
+  }
+
+  const hasProtocol = /^https?:\/\//.test(trimmed)
+
+  if (hasProtocol) {
+    const parsed = new URL(trimmed)
+    const protocol = parsed.protocol === "https:" ? "wss:" : "ws:"
+    const basePath = parsed.pathname === "/" ? "" : stripTrailingSlash(parsed.pathname)
+    const socketPath = ensureLeadingSlash(`${basePath}/socket.io`)
+    const socketPathWithSlash = socketPath.endsWith("/") ? socketPath : `${socketPath}/`
+    return `${protocol}//${parsed.host}${socketPathWithSlash}?EIO=4&transport=websocket`
+  }
+
+  const normalizedPath = stripTrailingSlash(ensureLeadingSlash(trimmed))
+  return `${normalizedPath}/socket.io/?EIO=4&transport=websocket`
+}
+
 export function connectToSocketServer(url, handlers = {}) {
   return new Promise((resolve, reject) => {
-    const wsUrl = `${url.replace(/^http/, "ws")}/socket.io/?EIO=4&transport=websocket`
+    const wsUrl = buildWebSocketUrl(url)
     const socket = new WebSocket(wsUrl)
     let pingIntervalId
     let isReady = false
@@ -45,7 +71,7 @@ export function connectToSocketServer(url, handlers = {}) {
         return
       }
 
-      if (message === "40") {
+      if (message.startsWith("40")) {
         isReady = true
         resolve({ emit, close })
         handlers.onConnect?.()
@@ -56,9 +82,18 @@ export function connectToSocketServer(url, handlers = {}) {
 
       try {
         const [event, payload] = JSON.parse(message.slice(2))
-        if (event === "syncState") handlers.onSyncState?.(payload)
-        if (event === "videoEvent") handlers.onVideoEvent?.(payload)
-        if (event === "error") handlers.onError?.(payload)
+        const eventHandlers = {
+          syncState: handlers.onSyncState,
+          videoEvent: handlers.onVideoEvent,
+          error: handlers.onError,
+          receive_message: handlers.onMessage,
+        }
+
+        if (eventHandlers[event]) {
+          eventHandlers[event](payload)
+        }
+
+        handlers.onEvent?.(event, payload)
       } catch (error) {
         console.warn("Failed to parse socket message", error)
       }
